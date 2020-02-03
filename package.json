@@ -1,0 +1,22 @@
+{
+  "name": "@happysanta/nodejs-sign-checker",
+  "version": "1.0.0",
+  "description": "Проверка подписи параметров запуска VK Mini Apps",
+  "main": "index.js",
+  "jsnext:main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "pub": "jest && npm publish --access=public"
+  },
+  "keywords": [],
+  "author": "Ivan Nedzvetskiy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HappySanta/vk-apps-sdk-js.git"
+  },
+  "homepage": "https://github.com/HappySanta/vk-apps-sdk-js#readme",
+  "devDependencies": {
+    "jest": "^25.1.0"
+  }
+}
