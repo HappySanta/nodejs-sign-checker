@@ -13,9 +13,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HappySanta/vk-apps-sdk-js.git"
+    "url": "git+https://github.com/HappySanta/nodejs-sign-checker.git"
   },
-  "homepage": "https://github.com/HappySanta/vk-apps-sdk-js#readme",
+  "homepage": "https://github.com/HappySanta/nodejs-sign-checker#readme",
   "devDependencies": {
     "jest": "^25.1.0"
   }
