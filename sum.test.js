@@ -27,14 +27,12 @@ test("check createStartParamsFromUrl", () => {
 		vk_access_token_settings:'notify',
 		vk_app_id:7284402,
 		vk_are_notifications_enabled:0,
-		vk_group_id:null,
 		vk_is_app_user:1,
 		vk_is_favorite:0,
 		vk_language:'ru',
 		vk_platform:'desktop_web',
 		vk_ref:'other',
 		vk_user_id:19039187,
-		vk_viewer_group_role:'',
 		sign:'QLhcxfbxJvOMtpCMipI3Ak2s6mvV7f-rVBqCGV6gmJ4',
 	})
 })
@@ -47,14 +45,12 @@ test("check getStartParamsFromUrl no group", () => {
 		vk_access_token_settings:'notify',
 		vk_app_id:7284402,
 		vk_are_notifications_enabled:0,
-		vk_group_id:null,
 		vk_is_app_user:1,
 		vk_is_favorite:0,
 		vk_language:'ru',
 		vk_platform:'desktop_web',
 		vk_ref:'other',
 		vk_user_id:19039187,
-		vk_viewer_group_role:'',
 		sign:'QLhcxfbxJvOMtpCMipI3Ak2s6mvV7f-rVBqCGV6gmJ4',
 	})
 })
