@@ -1,3 +1,4 @@
+const {createFakeUser} = require("./index")
 const {VkStartParams} = require("./index")
 const {createStartParamsFromUrl} = require("./index")
 const {checkVkMiniAppsSignUrl} = require("./index")
@@ -131,4 +132,20 @@ test("check parse params for url", () => {
 	expect(convertUrlToParams("https://vk.com?a=1&b=2")).toEqual({a: "1", b: "2"})
 	expect(convertUrlToParams("https://vk.com/?a=1&b=2")).toEqual({a: "1", b: "2"})
 	expect(convertUrlToParams("vk_access_token_settings=friends")).toEqual({vk_access_token_settings: "friends"})
+})
+
+test("check true way getStartParamsFromUrl", () => {
+	const urlNoGroup = "https://stels-cs.github.io/demo-vk-apps/VKWebAppOpenPayFormFailed.html?vk_access_token_settings=notify&vk_app_id=7284402&vk_are_notifications_enabled=0&vk_is_app_user=1&vk_is_favorite=0&vk_language=ru&vk_platform=desktop_web&vk_ref=other&vk_user_id=19039187&sign=QLhcxfbxJvOMtpCMipI3Ak2s6mvV7f-rVBqCGV6gmJ4"
+	const secretKey = 'YGZHWm3eO9T4oL6bApg2'
+	const data = createStartParamsFromUrl(urlNoGroup)
+	expect(data.calcSign(secretKey)).toEqual(data.sign)
+	expect(data.isValidSign(secretKey)).toEqual(true)
+})
+
+test("fake users", () => {
+	const user = createFakeUser(2050)
+	const secretKey = 'blablalba'
+	const data = createStartParamsFromUrl(user.getAuthUrl(secretKey))
+	expect(data.calcSign(secretKey)).toEqual(data.sign)
+	expect(data.isValidSign(secretKey)).toEqual(true)
 })

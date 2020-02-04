@@ -30,15 +30,16 @@ class VkStartParams {
 		this.vk_user_id = parseInt(vk_user_id, 10)
 		this.vk_app_id = parseInt(vk_app_id, 10)
 		this.vk_is_app_user = parseInt(vk_is_app_user, 10)
-		this.vk_group_id = vk_group_id ? parseInt(vk_group_id, 10) : null
+		this.vk_group_id = vk_group_id ? parseInt(vk_group_id, 10) : undefined
 		this.vk_are_notifications_enabled = parseInt(vk_are_notifications_enabled, 10)
 		this.vk_language = (vk_language || "").toString()
 		this.vk_ref = (vk_ref || "").toString()
 		this.vk_access_token_settings = (vk_access_token_settings || "").toString()
-		this.vk_access_token_settings_arr = this.vk_access_token_settings.split(',')
-		this.vk_viewer_group_role = (vk_viewer_group_role || "").toString()
+		this.vk_viewer_group_role = vk_viewer_group_role ? (vk_viewer_group_role || "").toString() : undefined
 		this.vk_platform = (vk_platform || "").toString()
 		this.vk_is_favorite = parseInt(vk_is_favorite, 10)
+
+		this._vk_access_token_settings_arr = this.vk_access_token_settings.split(',')
 		this.raw = {
 			vk_user_id,
 			vk_app_id,
@@ -169,7 +170,7 @@ class VkStartParams {
 	 * @private
 	 */
 	_hasTokenSettingsScope(singleScope) {
-		return this.vk_access_token_settings_arr.indexOf(singleScope) !== -1
+		return this._vk_access_token_settings_arr.indexOf(singleScope) !== -1
 	}
 
 	getUserId() {
@@ -204,7 +205,7 @@ class VkStartParams {
 		return this.vk_group_id
 	}
 
-	getViewer_groupRole() {
+	getViewerGroupRole() {
 		return this.vk_viewer_group_role
 	}
 
@@ -217,8 +218,29 @@ class VkStartParams {
 	}
 
 	getSign() {
-		return this._sign
+		return this.sign
 	}
+
+	isValidSign(secret) {
+		return this.calcSign(secret) === this.sign
+	}
+
+	calcSign(secret) {
+		return calcVkMiniAppsSignArgs(this, secret)
+	}
+
+	/**
+	 * @param {string} secret
+	 * @return {string}
+	 */
+	getAuthUrl(secret) {
+		const data = JSON.parse(JSON.stringify(this))
+		delete data.raw
+		delete data._vk_access_token_settings_arr
+		data.sign = this.calcSign(secret)
+		return querystring.stringify(data)
+	}
+
 }
 
 VkStartParams.MOBILE_IPHONE_MESSENGER = 'mobile_iphone_messenger'
@@ -269,20 +291,27 @@ function convertUrlToParams(url) {
  * @return {boolean}
  */
 function checkVkMiniAppsSignArgs(parsedParams, secret) {
-	const signParamsKeys = Object.keys(parsedParams).filter(key => key.indexOf('vk_') === 0)
+	return calcVkMiniAppsSignArgs(parsedParams, secret) === parsedParams.sign
+}
+
+/**
+ * @param {Object} parsedParams
+ * @param secret
+ * @return {String}
+ */
+function calcVkMiniAppsSignArgs(parsedParams, secret) {
+	const signParamsKeys = Object.keys(parsedParams).filter(key => (key.indexOf('vk_') === 0 && parsedParams[key] !== undefined))
 
 	let stringForSign = signParamsKeys.sort().map(key => (`${key}=${parsedParams[key]}`)).join("&")
 
 	const hmac = crypto.createHmac('sha256', secret)
 	hmac.write(stringForSign)
 	hmac.end()
-	const base64Sign = hmac.read()
+	return hmac.read()
 		.toString('base64')
 		.replace(/=/g, "")
 		.replace(/\+/g, "-")
 		.replace(/\//g, "_")
-
-	return base64Sign === parsedParams.sign
 }
 
 
@@ -326,6 +355,30 @@ function createStartParamsFromObject(data) {
 	return VkStartParams.fromObject(data)
 }
 
+/**
+ * @param {Number} userId
+ * @param {Number} groupId
+ * @param {Number} groupRole
+ * @return {VkStartParams}
+ */
+function createFakeUser(userId, groupId = undefined, groupRole = undefined) {
+	const data = {
+		vk_user_id: userId,
+		vk_app_id: 10,
+		vk_is_app_user: 0,
+		vk_are_notifications_enabled: 0,
+		vk_language: "ru",
+		vk_ref: "other",
+		vk_access_token_settings: "",
+		vk_group_id: groupId,
+		vk_viewer_group_role: groupRole,
+		vk_platform: VkStartParams.DESKTOP_WEB,
+		vk_is_favorite: 0,
+		sign: "",
+	}
+	return VkStartParams.fromObject(data)
+}
+
 module.exports = {
 	checkVkMiniAppsSignUrl,
 	checkVkMiniAppsSignArgs,
@@ -334,6 +387,7 @@ module.exports = {
 	createStartParamsFromUrl,
 	createStartParamsFromObject,
 	VkStartParams,
-	isValidUrl:checkVkMiniAppsSignUrl,
-	isValidParams:checkVkMiniAppsSignUrl,
+	isValidUrl: checkVkMiniAppsSignUrl,
+	isValidParams: checkVkMiniAppsSignUrl,
+	createFakeUser,
 }
