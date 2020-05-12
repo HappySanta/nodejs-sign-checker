@@ -1,6 +1,6 @@
 {
   "name": "@happysanta/nodejs-sign-checker",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Проверка подписи параметров запуска VK Mini Apps",
   "main": "index.js",
   "jsnext:main": "index.js",
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/HappySanta/nodejs-sign-checker#readme",
   "devDependencies": {
-    "jest": "^25.1.0"
+    "jest": "^25.1.0",
+    "minimist": ">=0.2.1"
   }
 }
