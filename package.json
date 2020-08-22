@@ -8,7 +8,6 @@
     "test": "jest",
     "pub": "jest && npm publish --access=public"
   },
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "keywords": [],
   "author": "Ivan Nedzvetskiy",
   "license": "MIT",
