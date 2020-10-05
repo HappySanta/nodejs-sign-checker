@@ -276,12 +276,10 @@ function convertUrlToParams(url) {
 			url = url.substr(1)
 		}
 	}
-
 	const parsedParams = querystring.parse(url)
-
-	if (parsedParams.vk_access_token_settings) {
-		parsedParams.vk_access_token_settings = encodeURIComponent(parsedParams.vk_access_token_settings)
-	}
+	// if (parsedParams.vk_access_token_settings) {
+	// 	parsedParams.vk_access_token_settings = encodeURIComponent(parsedParams.vk_access_token_settings)
+	// }
 	return parsedParams
 }
 
@@ -302,7 +300,7 @@ function checkVkMiniAppsSignArgs(parsedParams, secret) {
 function calcVkMiniAppsSignArgs(parsedParams, secret) {
 	const signParamsKeys = Object.keys(parsedParams).filter(key => (key.indexOf('vk_') === 0 && parsedParams[key] !== undefined))
 
-	let stringForSign = signParamsKeys.sort().map(key => (`${key}=${parsedParams[key]}`)).join("&")
+	let stringForSign = signParamsKeys.sort().map(key => querystring.stringify({[key]:parsedParams[key]})).join("&")
 
 	const hmac = crypto.createHmac('sha256', secret)
 	hmac.write(stringForSign)
