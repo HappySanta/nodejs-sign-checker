@@ -1,5 +1,6 @@
+tsconfig.json
+.idea/
 npm-debug.log
 .npmrc
 .git
-.idea
 .DS_Store
