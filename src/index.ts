@@ -3,6 +3,8 @@ import { VkStartParams } from './VkStartParams';
 import * as crypto from 'crypto';
 import Dict = NodeJS.Dict;
 
+export { VkStartParams } from './VkStartParams';
+
 /**
  * @param {String} url
  * @return {Object}
