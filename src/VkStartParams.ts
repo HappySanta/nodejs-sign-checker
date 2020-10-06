@@ -1,6 +1,7 @@
 import querystring from 'querystring';
 import { calcVkMiniAppsSignArgs } from './index';
-import Dict = NodeJS.Dict;
+
+export type Dict<T> = {[key:string]:T}
 
 export class VkStartParams {
   static MOBILE_IPHONE_MESSENGER = 'mobile_iphone_messenger';
@@ -17,7 +18,7 @@ export class VkStartParams {
   static MODER = 'moder';
   static MEMBER = 'member';
   static NONE = 'none';
-  public params: NodeJS.Dict<any>;
+  public params: Dict<any>;
 
   constructor(params: Dict<any>) {
     this.params = params;

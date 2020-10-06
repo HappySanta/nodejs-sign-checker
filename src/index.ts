@@ -1,8 +1,6 @@
 import * as querystring from 'querystring';
-import { VkStartParams } from './VkStartParams';
+import {Dict, VkStartParams} from './VkStartParams';
 import * as crypto from 'crypto';
-import Dict = NodeJS.Dict;
-
 export { VkStartParams } from './VkStartParams';
 
 /**
