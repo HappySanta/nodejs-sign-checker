@@ -141,5 +141,12 @@ describe('sign-checker', () => {
     expect(data.calcSign(secretKey)).toEqual(data.getSign());
     expect(data.isValidSign(secretKey)).toEqual(true);
   });
+
+  test("params with experiments", () => {
+    const args = 'https://test.dev1.hsstore.ru/demo-vk-apps/index.html?vk_access_token_settings=&vk_app_id=7648434&vk_are_notifications_enabled=0&vk_experiment={"950":0,"949":0}&vk_is_app_user=1&vk_is_favorite=0&vk_language=ru&vk_platform=desktop_web&vk_ref=other&vk_ts=1607004912&vk_user_id=19039187&sign=opZy_yHgqes6dvcqHApACJcf_dmHphIbMUlRWkJK7Rw'
+    const secret = '27cDPwLMFM4G6hetC9ed'
+    const data = createStartParamsFromUrl(args);
+    expect(data.isValidSign(secret)).toEqual(true);
+  })
 });
 

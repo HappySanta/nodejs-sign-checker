@@ -103,7 +103,7 @@ export class VkStartParams {
      * @return {boolean}
      */
   isMobileWeb() {
-    return this.getValue('vk_platform === VkStartParams.MOBILE_WEB');
+    return this.getValue('vk_platform') === VkStartParams.MOBILE_WEB;
   }
 
   /**
@@ -133,7 +133,7 @@ export class VkStartParams {
      * @return {boolean}
      */
   isGroupMember() {
-    return this.getValue('vk_viewer_group_role === VkStartParams.MEMBER');
+    return this.getValue('vk_viewer_group_role') === VkStartParams.MEMBER;
   }
 
   /**
