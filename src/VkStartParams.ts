@@ -1,7 +1,4 @@
-import querystring from 'querystring';
-import { calcVkMiniAppsSignArgs } from './index';
-
-export type Dict<T> = {[key:string]:T}
+import { bufferToBase64UrlSafe, calcVkMiniAppsSignArgsBuffer } from './index';
 
 export class VkStartParams {
   static MOBILE_IPHONE_MESSENGER = 'mobile_iphone_messenger';
@@ -18,25 +15,26 @@ export class VkStartParams {
   static MODER = 'moder';
   static MEMBER = 'member';
   static NONE = 'none';
-  public params: Dict<any>;
+  public params: URLSearchParams;
 
-  constructor(params: Dict<any>) {
+  constructor(params: URLSearchParams) {
     this.params = params;
   }
 
-  public getValue(name: string): any {
-    return this.params[name];
+  public getValue(name: string) {
+    return this.params.get(name);
   }
 
   public hasValue(name: string): boolean {
-    return this.params[name] !== undefined;
+    return this.params.has(name);
   }
 
   public getIntValue(name: string, def = 0): number {
-    if (!this.hasValue(name)) {
+    const v = this.getValue(name);
+    if (v === null) {
       return def;
     }
-    const value = parseInt(this.getValue(name), 10);
+    const value = parseInt(v, 10);
     if (!isNaN(value)) {return value;}
     return def;
   }
@@ -219,11 +217,13 @@ export class VkStartParams {
   }
 
   isValidSign(secret: string): boolean {
-    return this.calcSign(secret) === this.getSign();
+    const validSign = this.calcSign(secret);
+    const testSign = Buffer.from(this.getSign(), 'base64');
+    return validSign.equals(testSign);
   }
 
   calcSign(secret: string) {
-    return calcVkMiniAppsSignArgs(this.params, secret);
+    return calcVkMiniAppsSignArgsBuffer(this.params, secret);
   }
 
   /**
@@ -231,8 +231,8 @@ export class VkStartParams {
      * @return {string}
      */
   getAuthUrl(secret: string) {
-    const data = JSON.parse(JSON.stringify(this.params));
-    data.sign = this.calcSign(secret);
-    return querystring.stringify(data);
+    const data = new URLSearchParams(this.params.toString());
+    data.set('sign', bufferToBase64UrlSafe(this.calcSign(secret)));
+    return data.toString();
   }
 }

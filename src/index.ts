@@ -1,5 +1,5 @@
 import * as querystring from 'querystring';
-import {Dict, VkStartParams} from './VkStartParams';
+import { VkStartParams } from './VkStartParams';
 import * as crypto from 'crypto';
 export { VkStartParams } from './VkStartParams';
 
@@ -7,8 +7,8 @@ export { VkStartParams } from './VkStartParams';
  * @param {String} url
  * @return {Object}
  */
-export function convertUrlToParams(url: string): querystring.ParsedUrlQuery {
-  if (!url) {return {};}
+export function convertUrlToParams(url: string): URLSearchParams {
+  if (!url) {return new URLSearchParams();}
   url = url.trim();
   if (url.startsWith('https://') || url.startsWith('http://')) {
     url = new URL(url).search.substr(1);
@@ -20,7 +20,15 @@ export function convertUrlToParams(url: string): querystring.ParsedUrlQuery {
       url = url.substr(1);
     }
   }
-  return querystring.parse(url);
+  return new URLSearchParams(url);
+}
+
+export function uspToObject(u: URLSearchParams) {
+  const out: {[key: string]: string|null} = {};
+  for (const key of u.keys()) {
+    out[key] = u.get(key);
+  }
+  return out;
 }
 
 /**
@@ -28,8 +36,8 @@ export function convertUrlToParams(url: string): querystring.ParsedUrlQuery {
  * @param secret
  * @return {boolean}
  */
-export function checkVkMiniAppsSignArgs(parsedParams: querystring.ParsedUrlQuery, secret: string): boolean {
-  return calcVkMiniAppsSignArgs(parsedParams, secret) === parsedParams.sign;
+export function checkVkMiniAppsSignArgs(parsedParams: URLSearchParams, secret: string): boolean {
+  return calcVkMiniAppsSignArgs(parsedParams, secret) === parsedParams.get('sign');
 }
 
 /**
@@ -37,16 +45,38 @@ export function checkVkMiniAppsSignArgs(parsedParams: querystring.ParsedUrlQuery
  * @param secret
  * @return {String}
  */
-export function calcVkMiniAppsSignArgs(parsedParams: querystring.ParsedUrlQuery, secret: string) {
-  const signParamsKeys = Object.keys(parsedParams).filter((key) => key.startsWith('vk_') && parsedParams[key] !== undefined);
+export function calcVkMiniAppsSignArgsBuffer(parsedParams: URLSearchParams, secret: string) {
+  const signParamsKeys: string[] = [];
+  for (const key of parsedParams.keys()) {
+    if (key.startsWith('vk_') && parsedParams.get(key) !== undefined) {
+      signParamsKeys.push(key);
+    }
+  }
 
-  let stringForSign = signParamsKeys.sort().map((key) => querystring.stringify({ [key]: parsedParams[key] })).join('&');
+  let stringForSign = signParamsKeys.sort((a, b)=>a.localeCompare(b)).map((key) => querystring.stringify({ [key]: parsedParams.get(key) })).join('&');
 
   const hmac = crypto.createHmac('sha256', secret);
   hmac.write(stringForSign);
   hmac.end();
-  return hmac.read()
-    .toString('base64')
+  const data = hmac.read();
+  if (data instanceof Buffer) {
+    return data;
+  } else {
+    throw new Error('hmac.read() return no buffer value');
+  }
+}
+
+/**
+ * @param {Object} parsedParams
+ * @param secret
+ * @return {String}
+ */
+export function calcVkMiniAppsSignArgs(parsedParams: URLSearchParams, secret: string) {
+  return bufferToBase64UrlSafe(calcVkMiniAppsSignArgsBuffer(parsedParams, secret));
+}
+
+export function bufferToBase64UrlSafe(data: Buffer) {
+  return data.toString('base64')
     .replace(/=/g, '')
     .replace(/\+/g, '-')
     .replace(/\//g, '_');
@@ -88,7 +118,7 @@ export function createStartParamsFromUrl(url: string): VkStartParams {
  * @param {Object} data
  * @return {VkStartParams}
  */
-export function createStartParamsFromObject(data: Dict<any>) {
+export function createStartParamsFromObject(data: URLSearchParams) {
   return new VkStartParams(data);
 }
 
@@ -99,19 +129,21 @@ export function createStartParamsFromObject(data: Dict<any>) {
  * @return {VkStartParams}
  */
 export function createFakeUser(userId: number, groupId?: number, groupRole = 'none') {
-  const data = {
-    vk_user_id: userId,
-    vk_app_id: 10,
-    vk_is_app_user: 0,
-    vk_are_notifications_enabled: 0,
+  const data: Record<string, string> = {
+    vk_user_id: userId.toString(),
+    vk_app_id: '10',
+    vk_is_app_user: '0',
+    vk_are_notifications_enabled: '0',
     vk_language: 'ru',
     vk_ref: 'other',
     vk_access_token_settings: '',
-    vk_group_id: groupId,
     vk_viewer_group_role: groupRole,
     vk_platform: VkStartParams.DESKTOP_WEB,
-    vk_is_favorite: 0,
+    vk_is_favorite: '0',
     sign: '',
   };
-  return new VkStartParams(data);
+  if (groupId) {
+    data['vk_group_id'] = groupId.toString();
+  }
+  return new VkStartParams(new URLSearchParams(data));
 }
